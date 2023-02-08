@@ -29,7 +29,7 @@ RUN yum install -y curl tar xz make gcc gcc-c++ zlib zlib-devel automake autocon
 
 WORKDIR /build
 
-env PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
+ENV PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
 
 RUN curl http://prdownloads.sourceforge.net/libpng/libpng-${LIBPNG_VERSION}.tar.xz -L -o libpng.tar.xz && \
   tar xf libpng.tar.xz && \
@@ -53,7 +53,7 @@ RUN yum install -y curl tar gzip make gcc gcc-c++ automake autoconf pkgconfig li
 
 WORKDIR /build
 
-env PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
+ENV PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
 
 RUN curl https://github.com/webmproject/libwebp/archive/${LIBWEBP_VERSION}.tar.gz -L -o libwebp.tar.gz && \
   tar xf libwebp.tar.gz && \
@@ -78,7 +78,7 @@ RUN yum install -y curl tar gzip make cmake gcc gcc-c++ pkgconfig
 
 WORKDIR /build
 
-env PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
+ENV PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
 
 RUN curl https://github.com/uclouvain/openjpeg/archive/v${OPENJPEG_VERSION}/openjpeg-${OPENJPEG_VERSION}.tar.gz -L -o openjpeg.tar.gz && \
   tar xf openjpeg.tar.gz && \
@@ -94,6 +94,58 @@ RUN curl https://github.com/uclouvain/openjpeg/archive/v${OPENJPEG_VERSION}/open
   make install && \
   rm -rf /build/openjpeg*
 
+FROM amazonlinux:2 as libde265
+
+ARG LIBDE265_VERSION=1.0.11
+
+RUN yum install -y curl tar gzip make gcc gcc-c++ automake autoconf pkgconfig libtool libaom-devel
+
+WORKDIR /build
+
+ENV PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
+
+RUN curl https://github.com/strukturag/libde265/releases/download/v${LIBDE265_VERSION}/libde265-${LIBDE265_VERSION}.tar.gz -L -o libde265.tar.gz && \
+  tar xf libde265.tar.gz && \
+  cd libde265* && \
+  sh autogen.sh && \
+  ./configure \
+    CPPFLAGS=-I/build/cache/include \
+    LDFLAGS=-L/build/cache/lib \
+    --disable-dependency-tracking \
+    --disable-shared \
+    --enable-static \
+    --prefix=/build/cache && \
+  make && \
+  make install && \
+  rm -rf /build/libde265*
+
+FROM amazonlinux:2 as libheif
+
+ARG LIBHEIF_VERSION=1.14.2
+
+RUN yum install -y curl tar gzip make gcc gcc-c++ automake autoconf pkgconfig libtool libaom-devel
+
+WORKDIR /build
+
+ENV PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
+
+COPY --from=libde265 /build/cache /build/cache
+
+RUN curl https://github.com/strukturag/libheif/releases/download/v${LIBHEIF_VERSION}/libheif-${LIBHEIF_VERSION}.tar.gz -L -o libheif.tar.gz && \
+  tar xf libheif.tar.gz && \
+  cd libheif* && \
+  sh autogen.sh && \
+  ./configure \
+    CPPFLAGS=-I/build/cache/include \
+    LDFLAGS=-L/build/cache/lib \
+    --disable-dependency-tracking \
+    --disable-shared \
+    --enable-static \
+    --prefix=/build/cache && \
+  make && \
+  make install && \
+  rm -rf /build/libheif*
+
 FROM amazonlinux:2
 
 ARG IMAGEMAGICK_VERSION=7.1.0-60
@@ -102,12 +154,13 @@ RUN yum install -y curl tar gzip make gcc gcc-c++ zlib zlib-devel automake autoc
 
 WORKDIR /build
 
-env PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
+ENV PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
 
 COPY --from=libjpeg /build/cache /build/cache
 COPY --from=libpng /build/cache /build/cache
 COPY --from=libwebp /build/cache /build/cache
 COPY --from=openjpeg /build/cache /build/cache
+COPY --from=libheif /build/cache /build/cache
 
 RUN curl https://github.com/ImageMagick/ImageMagick/archive/${IMAGEMAGICK_VERSION}.tar.gz -L -o ImageMagick.tar.gz && \
   tar xf ImageMagick.tar.gz && \
