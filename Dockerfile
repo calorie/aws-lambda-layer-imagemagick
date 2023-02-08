@@ -1,10 +1,12 @@
 FROM amazonlinux:2 as libjpeg
 
+ARG LIBJPEG_VERSION=2.1.5
+
 RUN yum install -y curl tar gzip make cmake gcc gcc-c++ nasm
 
 WORKDIR /build
 
-RUN curl https://github.com/libjpeg-turbo/libjpeg-turbo/archive/refs/tags/2.1.5.tar.gz -L -o libjpeg-turbo.tar.gz && \
+RUN curl https://github.com/libjpeg-turbo/libjpeg-turbo/archive/refs/tags/${LIBJPEG_VERSION}.tar.gz -L -o libjpeg-turbo.tar.gz && \
   tar xf libjpeg-turbo.tar.gz && \
   cd libjpeg* && \
   mkdir -p build && \
@@ -21,13 +23,15 @@ RUN curl https://github.com/libjpeg-turbo/libjpeg-turbo/archive/refs/tags/2.1.5.
 
 FROM amazonlinux:2 as libpng
 
+ARG LIBPNG_VERSION=1.6.39
+
 RUN yum install -y curl tar xz make gcc gcc-c++ zlib zlib-devel automake autoconf pkgconfig libtool
 
 WORKDIR /build
 
 env PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
 
-RUN curl http://prdownloads.sourceforge.net/libpng/libpng-1.6.39.tar.xz -L -o libpng.tar.xz && \
+RUN curl http://prdownloads.sourceforge.net/libpng/libpng-${LIBPNG_VERSION}.tar.xz -L -o libpng.tar.xz && \
   tar xf libpng.tar.xz && \
   cd libpng* && \
   ./configure \
@@ -43,13 +47,15 @@ RUN curl http://prdownloads.sourceforge.net/libpng/libpng-1.6.39.tar.xz -L -o li
 
 FROM amazonlinux:2 as libwebp
 
+ARG LIBWEBP_VERSION=v1.3.0
+
 RUN yum install -y curl tar gzip make gcc gcc-c++ automake autoconf pkgconfig libtool
 
 WORKDIR /build
 
 env PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
 
-RUN curl https://github.com/webmproject/libwebp/archive/v1.3.0.tar.gz -L -o libwebp.tar.gz && \
+RUN curl https://github.com/webmproject/libwebp/archive/${LIBWEBP_VERSION}.tar.gz -L -o libwebp.tar.gz && \
   tar xf libwebp.tar.gz && \
   cd libwebp* && \
   ./autogen.sh && \
@@ -66,13 +72,15 @@ RUN curl https://github.com/webmproject/libwebp/archive/v1.3.0.tar.gz -L -o libw
 
 FROM amazonlinux:2 as openjpeg
 
+ARG OPENJPEG_VERSION=2.5.0
+
 RUN yum install -y curl tar gzip make cmake gcc gcc-c++ pkgconfig
 
 WORKDIR /build
 
 env PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
 
-RUN curl https://github.com/uclouvain/openjpeg/archive/v2.5.0/openjpeg-2.5.0.tar.gz -L -o openjpeg.tar.gz && \
+RUN curl https://github.com/uclouvain/openjpeg/archive/v${OPENJPEG_VERSION}/openjpeg-${OPENJPEG_VERSION}.tar.gz -L -o openjpeg.tar.gz && \
   tar xf openjpeg.tar.gz && \
   cd openjpeg* && \
   mkdir -p build && \
@@ -88,6 +96,8 @@ RUN curl https://github.com/uclouvain/openjpeg/archive/v2.5.0/openjpeg-2.5.0.tar
 
 FROM amazonlinux:2
 
+ARG IMAGEMAGICK_VERSION=7.1.0-60
+
 RUN yum install -y curl tar gzip make gcc gcc-c++ zlib zlib-devel automake autoconf pkgconfig libtool
 
 WORKDIR /build
@@ -99,7 +109,7 @@ COPY --from=libpng /build/cache /build/cache
 COPY --from=libwebp /build/cache /build/cache
 COPY --from=openjpeg /build/cache /build/cache
 
-RUN curl https://github.com/ImageMagick/ImageMagick/archive/7.1.0-60.tar.gz -L -o ImageMagick.tar.gz && \
+RUN curl https://github.com/ImageMagick/ImageMagick/archive/${IMAGEMAGICK_VERSION}.tar.gz -L -o ImageMagick.tar.gz && \
   tar xf ImageMagick.tar.gz && \
   cd ImageMagick* && \
   ./configure \
@@ -108,7 +118,7 @@ RUN curl https://github.com/ImageMagick/ImageMagick/archive/7.1.0-60.tar.gz -L -
     --disable-dependency-tracking \
     --disable-shared \
     --enable-static \
-    --prefix=/root/result \
+    --prefix=/build/result \
     --enable-delegate-build \
     --disable-installed \
     --without-modules \
