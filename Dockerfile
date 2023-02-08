@@ -25,11 +25,9 @@ FROM amazonlinux:2 as libpng
 
 ARG LIBPNG_VERSION=1.6.39
 
-RUN yum install -y curl tar xz make gcc gcc-c++ zlib zlib-devel automake autoconf pkgconfig libtool
+RUN yum install -y curl tar xz make gcc gcc-c++ zlib zlib-devel automake autoconf libtool
 
 WORKDIR /build
-
-ENV PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
 
 RUN curl http://prdownloads.sourceforge.net/libpng/libpng-${LIBPNG_VERSION}.tar.xz -L -o libpng.tar.xz && \
   tar xf libpng.tar.xz && \
@@ -49,11 +47,9 @@ FROM amazonlinux:2 as libwebp
 
 ARG LIBWEBP_VERSION=v1.3.0
 
-RUN yum install -y curl tar gzip make gcc gcc-c++ automake autoconf pkgconfig libtool
+RUN yum install -y curl tar gzip make gcc gcc-c++ automake autoconf libtool
 
 WORKDIR /build
-
-ENV PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
 
 RUN curl https://github.com/webmproject/libwebp/archive/${LIBWEBP_VERSION}.tar.gz -L -o libwebp.tar.gz && \
   tar xf libwebp.tar.gz && \
@@ -74,11 +70,9 @@ FROM amazonlinux:2 as openjpeg
 
 ARG OPENJPEG_VERSION=2.5.0
 
-RUN yum install -y curl tar gzip make cmake gcc gcc-c++ pkgconfig
+RUN yum install -y curl tar gzip make cmake gcc gcc-c++
 
 WORKDIR /build
-
-ENV PKG_CONFIG_PATH=/build/cache/lib/pkgconfig
 
 RUN curl https://github.com/uclouvain/openjpeg/archive/v${OPENJPEG_VERSION}/openjpeg-${OPENJPEG_VERSION}.tar.gz -L -o openjpeg.tar.gz && \
   tar xf openjpeg.tar.gz && \
@@ -98,7 +92,7 @@ FROM amazonlinux:2 as libde265
 
 ARG LIBDE265_VERSION=1.0.11
 
-RUN yum install -y curl tar gzip make gcc gcc-c++ automake autoconf pkgconfig libtool libaom-devel
+RUN yum install -y curl tar gzip make gcc gcc-c++ automake autoconf libtool libaom-devel pkgconfig
 
 WORKDIR /build
 
@@ -123,7 +117,7 @@ FROM amazonlinux:2 as libheif
 
 ARG LIBHEIF_VERSION=1.14.2
 
-RUN yum install -y curl tar gzip make gcc gcc-c++ automake autoconf pkgconfig libtool libaom-devel
+RUN yum install -y curl tar gzip make gcc gcc-c++ automake autoconf libtool libaom-devel pkgconfig
 
 WORKDIR /build
 
@@ -150,7 +144,7 @@ FROM amazonlinux:2
 
 ARG IMAGEMAGICK_VERSION=7.1.0-60
 
-RUN yum install -y curl tar gzip make gcc gcc-c++ zlib zlib-devel automake autoconf pkgconfig libtool
+RUN yum install -y curl tar gzip make gcc gcc-c++ zlib zlib-devel automake autoconf libtool pkgconfig
 
 WORKDIR /build
 
